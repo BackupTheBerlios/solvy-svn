@@ -1,0 +1,250 @@
+#Cette classe represente un domaine, c'est à dire un ensemble d'entier, il peut etre implementé à l'aide de n'importe quel structure.
+class Domain
+
+	####Variables d'instance ###
+
+	@rep
+
+
+	### Accesseurs ###
+
+	attr_writer :rep
+	attr_reader :rep
+
+
+	### Constructeur ###
+
+	def initialize(tab=[])
+		#pour le moment un domaine est un tableau.
+		if tab.is_a?(Range)
+			@rep = [tab]
+		elsif tab.is_a?(Array)
+			if tab.empty?
+				@rep = []
+			elsif tab[0].is_a?(Fixnum)
+				@rep = [Range.new(tab.first,tab.last)]
+			elsif tab[0].is_a?(Range)
+				@rep = tab.dup
+			end
+		end
+
+	end
+
+
+	### Methode + Operator overloading ###
+
+	def opposite #Retourne un nouveau domaine avec les opposés
+		temp = Array.new(@rep.length,0)
+		for i in 0..@rep.length-1
+			temp[@rep.length-1-i] = -@rep[i]
+		end
+		return Domain.new(temp.dup)
+	end
+
+	def [](a)
+		for i in 0..@rep.length-1
+			if a > @rep.at(i).length-1
+				a-= @rep.at(i).length
+			else
+				return @rep.at(i).first+a
+			end
+		end
+		raise "Index out of Bounds"
+	end
+
+	def +(other)
+		Domain.new(@rep+other.rep) #parce que ici c des tableaux !
+	end
+
+	def -(other)
+		if other.is_a?(Domain)
+			#puts "BUITOSAURE"
+			returned = Domain.new(@rep.dup)
+			other.each do |i| 
+				#puts i
+				returned.delete(i)
+			end
+			return returned
+		elsif other.is_a?(Fixnum)
+			temp = @rep
+			for i in 0..@rep.length-1
+				if @rep[i].first < other && @rep[i].last > other
+					temp[i] = [@rep[i].first..other-1,other+1..@rep[i].last]
+					temp.flatten!
+					return Domain.new(temp)
+				elsif other == @rep[i].first
+					if @rep[i].length == 1
+						temp.delete_at(i)
+						return Domain.new(temp)
+					else
+						temp[i] = Range.new(@rep[i].first+1,@rep[i].last)
+						return Domain.new(temp)
+					end
+				elsif  other == @rep[i].last
+					if @rep[i].length == 1
+						temp.delete_at(i)
+						return Domain.new(temp)
+					else
+						temp[i] = Range.new(@rep[i].first,@rep[i].last-1)
+						return Domain.new(temp)
+					end
+
+				end
+
+			end
+
+		end
+	end
+	def &(other)
+		temp = Domain.new(self.rep.dup)
+		other.each do |i|
+			if !temp.include?(i)
+				temp.delete(i)
+			end
+		end
+		temp.each do |i|
+			if !other.include?(i)
+				temp.delete(i)
+			end
+		end
+		return temp
+	end
+
+	def ==(other)
+		@rep == other.rep
+	end
+
+	def empty?
+		@rep.empty?
+	end
+
+	def include?(integer)
+		b =false
+		@rep.each do |rg|
+			b = b || rg.include?(integer)
+			if b
+				return b
+			end
+		end
+		b
+	end
+
+	def delete_at(i)
+		delete(self[i])
+	end
+
+	#def dup
+	#	Domain.new(@rep.dup)
+	#end
+
+	def last
+		puts @rep
+		@rep.last.last
+	end
+
+	def first
+		@rep.first.first
+	end
+
+	def pop
+		temp = last
+		if @rep.last.first == @rep.last.last
+			@rep.pop
+		else
+			@rep[@rep.length-1] = @rep.last.first..temp-1
+		end
+		temp
+	end
+
+	def push(i)
+		@rep.push(i)
+	end
+
+	alias << push
+
+	def shift
+		temp = first
+		if @rep.first.first == @rep.first.last
+			@rep.shift
+		else
+			@rep[0] = (temp+1)..@rep.first.last
+		end
+		temp
+	end
+
+	def length
+		l = 0
+		@rep.each { |rg| l+=rg.length}
+	  l
+	end
+
+	alias size length
+
+	def sort
+		@rep = @rep.sort
+	end
+
+	def to_a
+		a = []
+		@rep.each { |rg| a = a +rg.to_a }
+		a
+	end
+
+	def to_s
+		st = ""
+		for i in 0..@rep.length-1
+			st+=@rep[i].to_a.to_s
+		end
+		st
+	end
+
+	def delete obj
+		for i in 0..@rep.length-1
+			if @rep[i].first < obj && @rep[i].last > obj
+				@rep[i] = [@rep[i].first..obj-1,obj+1..@rep[i].last]
+				@rep.flatten!
+				break
+			elsif obj == @rep[i].first
+				if @rep[i].length == 1
+					@rep.delete_at(i)
+					break
+				else
+					@rep[i] = Range.new(@rep[i].first+1,@rep[i].last)
+					break
+				end
+			elsif obj == @rep[i].last
+				if @rep[i].length == 1
+					@rep.delete_at(i)
+					break
+				else
+					@rep[i] = Range.new(@rep[i].first,@rep[i].last-1)
+					break
+				end
+			end
+		end
+	end
+
+	def each
+		@rep.each{|r| r.each {|i| yield i}}
+	end
+
+	def map
+		Domain.new(@rep.map{|i| yield i})
+	end
+end
+
+class Range
+
+
+
+	def length
+		last-first+1
+	end
+
+
+
+	def -(other)
+
+
+	end
+end

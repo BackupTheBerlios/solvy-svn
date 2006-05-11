@@ -1,0 +1,36 @@
+Bon, le but c'est de rendre le système de branching un peu plus flexible. Pas bcp de changements par rapport au système actuel, mais bcp plus de possibilités.
+
+==Fonction objectif==
+Afin de gérer du branch&bound générique, il faut pouvoir avoir une fonction objectif.
+Ce serait une méthode computeObjective() ou un truc du genre
+Par défaut, c'est une fonction qui renvoit 1 sauf lors qu'il y a contradiction. Il n'y a donc pas de solution à favoriser.
+La fonction doit renvoyer un entier, en fonction des variables déjà instanciées et/ou des contraintes. Au fur et à mesure de l'instanciation, il faut
+que la valeur objectif diminue.
+Cela permet d'avoir des problèmes de maximisation (j'ai pas regardé ce que t'as fait de ce coté) et/ou d'accéler la recherche en favorisant certaines branches.
+L'utilisateur devra redéfinir cette fonction, mais c'est pas nécessaire pour un pb basique du type sudoku.
+
+==Choix des variables==
+Ben là c'est ce que tu veux faire.
+Une méthode permet découper l'espace en deux (soit instanciation arbitraire d'une variable) soit division du domaine de la variable en deux.
+Par défaut il faudrait qu'il y ait -division du domaine en deux, -choix de la première variable, -choix d'une var aléatoire (ce qui a déjà été fait quoi).
+
+
+==Branching==
+Actuellement la recherche suit un arbre en profondeur. Il faudra pour des raisons d'optimisation de pouvoir se déplacer sur n'importe quel noeud de l'arbre en fonction de la valeur retournée par la fonction objectif. Ça sera probablement le plus chiant à faire.
+
+==Rubyyyyyyyyyyyyyyyyyyyyyy==
+Faudra voir comment on peut passer une méthode en paramètres. Faudra voir le moyen le plus élégant
+
+
+Bref, y'a rien de révolutionnaire. Il s'agit plus de foutre une abstraction pour qu'on puisse redéfinir certains trucs en tant qu'utilisateur sans avoir à tripatouiller le code de solvy tout en gardant un très grand champ d'applications.
+
+
+Typiquement, dans le cas de ton projet, tu écris une méthodes
+def grasp(variables)
+  traitement
+  variable[1] <= 3
+end
+
+problem.setVariableChooser(:grasp)
+
+Faut réfléchir comment avoir bien un truc qui coupe l'univers en deux machins disjoints (pas trop d'idées à froid comme ça), mais je veux bien m'y pencher plus sérieusement.
