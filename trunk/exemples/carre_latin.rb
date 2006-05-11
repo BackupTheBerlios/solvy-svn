@@ -5,7 +5,7 @@ opts=Hash.new(0)
 ARGV.each do |foo|
   opts[foo.split('=')[0]]=foo.split('=')[1].to_i
 end
-n=5
+n=4
 n=opts["n"] if opts["n"] != 0
 
 pb = Problem.new
@@ -28,5 +28,5 @@ while sol.next_sol
   tab.print_domain
   puts
 end
-
+puts "I found "+sol.nb_found.to_s+" solution(s)"
 
