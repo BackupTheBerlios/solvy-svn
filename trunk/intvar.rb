@@ -121,6 +121,10 @@ class IntVar
 		return (domain.length == 1)
 	end
 
+	def call 
+		self
+	end
+
 	def result
 		if guessed?
 			domain.first

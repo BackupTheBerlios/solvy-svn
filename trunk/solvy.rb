@@ -193,7 +193,8 @@ class Solvy
         else
           @minimum[i] = [@nb_found,x.domain.first]
         end
-        cst = (x < @problem.civ("DuMmyMini"+@problem.dummyNameNb.to_s,x.domain.to_a.dup,nil))
+        cst = (x.call < @problem.civ("DuMmyMini"+@problem.dummyNameNb.to_s,x.domain.to_a.dup,nil))
+
         
         @problem.post(cst)
         @problem.enfile(cst)
@@ -214,8 +215,8 @@ class Solvy
         else
           @maximum[i] = [@nb_found,x.domain.last]
         end
-        cst = (x > @problem.civ("DuMmyMini"+@problem.dummyNameNb.to_s,x.domain.to_a.dup,nil))
-        
+        cst = (x.call > @problem.civ("DuMmyMini"+@problem.dummyNameNb.to_s,x.domain.to_a.dup,nil))
+       
         @problem.post(cst)
         @problem.enfile(cst)
         @problem.dummyNameNb+=1
@@ -227,7 +228,7 @@ class Solvy
   end
   
   def recSolve(compteur)		
-    
+   
     # On va essayer de propager les contraintes, si prop retourne faux, c que le probleme en l'etat est surcontraint, il va falloir backtracké
     if !prop(compteur,@pile)
       return false
@@ -241,8 +242,8 @@ class Solvy
       
       # Au besoin on va stocker la solution si elle est minimale OU maximale
       minimize
-      maximize
-      
+			maximize
+     
       if @all
         save_last_solution
         @cv2.signal

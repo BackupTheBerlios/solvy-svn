@@ -242,6 +242,7 @@ class Problem < Tools
     varS.specifique = cst
     return varS
   end
+
   
   # Retourne une variable de la somme de deux variables
   def plus(iva,ivb)
@@ -323,7 +324,9 @@ class Problem < Tools
 			end
 			currentvar
 		end
-		IntVarDyn.new("Dynamic",my_proc,tab_of_intvar,self)
+		out = IntVarDyn.new("DuMmyDynamic"+@dummyNameNb.to_s,my_proc,tab_of_intvar,self)
+		@dummyNameNb+=1
+		out
 	end
   
 end
