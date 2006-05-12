@@ -1,7 +1,8 @@
 # ici, c'est la classe problem, elle decrit le problem, elle contient le Hash des variables/contraintes
 require 'set'
 # intvar.rb est la classe qui represente une variable
-require 'intvar.rb'
+require 'intvar_static.rb'
+require 'intvar_dynamic.rb'
 
 # les outils de manipulation des tableaux...
 require 'tools/tools.rb'
@@ -128,6 +129,12 @@ class Problem < Tools
 
 	# Resoud le probleme
 	
+	def create_file
+		myH.each do |var|
+			enfile(var.pile_const)
+		end
+	end
+	
 	def solve
 		myH.each do |var|
 			enfile(var.pile_const)
@@ -149,10 +156,10 @@ class Problem < Tools
   # Sert à créer une variable, en indiquant un nom une borne inf et sup
   def createIntVar(name,mini,maxi)
     if mini.class == Array
-      return IntVar.new(name,mini,self)
+      return IntVarStat.new(name,mini,self)
     elsif (mini.is_a?(Integer) && maxi.is_a?(Integer))
       temparr =(mini..maxi)
-      return IntVar.new(name,temparr.dup,self)
+      return IntVarStat.new(name,temparr.dup,self)
     else 
       puts "Error"
     end
@@ -221,7 +228,7 @@ class Problem < Tools
       elsif tab[i].is_a?(Integer)
         maxi+=tab[i]*coef[i]
         mini+=tab[i]*coef[i]
-        tab[i]= IntVar.new("DuMmyINT"+tab[i].to_s,[tab[i]],self)
+        tab[i]= IntVarStat.new("DuMmyINT"+tab[i].to_s,[tab[i]],self)
       end
     end
     varS = createIntVar("PlusDuMmy"+@dummyNameNb.to_s,mini,maxi)
@@ -247,7 +254,7 @@ class Problem < Tools
       temp = -ivb
       temp.name="MinusDuMmy"+@dummyNameNb.to_s
     elsif ivb.is_a?(Integer)
-      temp = IntVar.new("DuMmyINT"+ivb.to_s,[-ivb],self)	
+      temp = IntVarStat.new("DuMmyINT"+ivb.to_s,[-ivb],self)	
     end
     post(ContrainteOpEq.new(ivb,temp))
     @dummyNameNb+=1	
@@ -267,7 +274,7 @@ class Problem < Tools
       elsif tab[i].is_a?(Integer)
         mini*= tab[i]
         maxi*= tab[i]
-        tab[i] = IntVar.new("DuMmyINT"+tab[i].to_s,[tab[i]],self)
+        tab[i] = IntVarStat.new("DuMmyINT"+tab[i].to_s,[tab[i]],self)
       end
     end
     var_returned = civ("MultDuMmy"+@dummyNameNb.to_s,mini,maxi)
@@ -294,13 +301,29 @@ class Problem < Tools
   # rajoute une fonction objectif à maximiser
   def maximize(intvar)
     @maxi.push(intvar)
-			post(eq(IntVar.new("Objectif",intvar.domain.first..intvar.domain.last,self),intvar))
+			post(eq(IntVarStat.new("Objectif",intvar.domain.first..intvar.domain.last,self),intvar))
   end
   
   # rajoute une fonction objectif à minimiser
   def minimize(intvar)
     @mini.push(intvar)
-		post(eq(IntVar.new("Objectif",intvar.domain.first..intvar.domain.last,self),intvar))
+		post(eq(IntVarStat.new("Objectif",intvar.domain.first..intvar.domain.last,self),intvar))
   end
+
+	#return a dynamic intvar that can take the mininmum value
+	def min(tab_of_intvar)
+		my_proc = Proc.new do |tab|
+			currentvar=tab[0]
+			currentmin=currentvar.domain.first
+			tab.each do |var|
+				if var.domain.first < currentmin
+					currentmin = var.domain.first
+					currentvar=var
+				end
+			end
+			currentvar
+		end
+		IntVarDyn.new("Dynamic",my_proc,tab_of_intvar,self)
+	end
   
 end

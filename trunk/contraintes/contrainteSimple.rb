@@ -8,14 +8,14 @@ class ContrainteSimple < Contrainte
 	### Constructeur ###
 
 	def initialize(avar1,avar2,type)
-		if (avar1.class == IntVar && avar2.class == IntVar)
+		if (avar1.is_a?(IntVar) && avar2.is_a?(IntVar))
 			super([avar1,avar2],type)
 
-		elsif (avar2.is_a?(Integer) && avar1.class == IntVar)
-			super([avar1,IntVar.new("DuMmyINT"+avar2.to_s,[avar2],avar1.problem)],type)
+		elsif (avar2.is_a?(Integer) && avar1.is_a?(IntVar))
+			super([avar1,IntVarStat.new("DuMmyINT"+avar2.to_s,[avar2],avar1.problem)],type)
 
-		elsif (avar1.is_a?(Integer) && avar2.class == IntVar)
-			super([IntVar.new("DuMmyINT"+avar1.to_s,[avar1],avar2.problem),avar2],type)
+		elsif (avar1.is_a?(Integer) && avar2.is_a?(IntVar))
+			super([IntVarStat.new("DuMmyINT"+avar1.to_s,[avar1],avar2.problem),avar2],type)
 
 		else
 

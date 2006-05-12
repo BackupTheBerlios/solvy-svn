@@ -8,20 +8,19 @@ class IntVar
 	### variables d'instance ###
 
 	@name							#Le nom de la variable (string)
-	@domain						#Le domaine de type Domain, c'est un ensemble d'entier
 	@depend						#Variable d'etat, pour savoir si il faut tenter un branching										#sur cette variable.
 	@problem					#Le probleme auquel la variable est liée
-
-	@pile_const				#pile des contraintes associés à cette variable
+	@domain
+	@pile_const			#pile des contraintes associés à cette variable
 	@id							#identifiant unique de l'instance
 	@done
 	@specifique				#Pointeur vers une contrainte utile.
 	@in_problem
 	### accesseurs ###
 
-	attr_reader :name,:domain,:problem,:pile_const,:id,:done
+	attr_reader :problem,:pile_const,:id,:done
 	attr_writer :depend,:name,:pile_const,:done
-	attr_accessor :specifique,:in_problem
+	attr_accessor :specifique,:in_problem,:domain,:name
 
 	def depend?
 		@depend
@@ -42,44 +41,13 @@ class IntVar
 	end
 		
 
-	def setDomain(unTab,compteur,pile)
-		if unTab == @domain
-			
-		
-		elsif unTab.is_a?(Domain)
-			if compteur >=0
-				pile.push([compteur,self,self.domain.dup])
-			end
-			#@domain = unTab
-			changed #le domaine a changé (utilisé pour observer) 
-			#On fait remarquer à ceux qui nous observent les changements
-			#Le 1er paramètre sont les éléments supprimés
-			#Le 2e les éléments rajoutés
-			#Le 3e, c'est pour qu'on sache quel objet a été modifié
-			deleted = @domain - unTab
-			added = unTab - @domain
-			@domain = unTab
-			notify_observers(deleted,added, self,compteur,pile)
-			if compteur >=0
-				@problem.enfile(@pile_const)
-			end
-	  else
-		 raise "SetDomain : argument is not a domain!"
-		end
-		
-	end
-
-
-
 	### constructeur ###
 
-	def initialize(aname,adomain,pb)
+	def initialize(aname,pb)
 		@id = @@id_count
 		@@id_count += 1
-		if (aname.is_a?(String) && (adomain.is_a?(Array) || adomain.is_a?(Range)))
+		if (aname.is_a?(String))
 			@name = aname
-			@domain = Domain.new(adomain)
-			@depend = false
 			@problem = pb
 			@pile_const = []
 			@done = false
@@ -94,12 +62,6 @@ class IntVar
 
 	### Operator Overloading ###
 
-
-	def -@
-		a = IntVar.new("DuMmyy",domain.opposite.to_a,@problem)
-		@problem.post(@problem.opeq(self,a))
-		return a
-	end
 
 	def -(other)
 		@problem.minus(self,other)
@@ -154,19 +116,14 @@ class IntVar
 	end
 
 
-	def dup()								#copie en profondeur l'objet courant
-		out = IntVar.new(name().dup,domain.to_a,@problem)
-		return out
-	end
-
 
 	def guessed?()					#Retourne vrai si la variable a été devinée
-		return (@domain.length == 1)
+		return (domain.length == 1)
 	end
 
 	def result
 		if guessed?
-			@domain.first
+			domain.first
 		else
 			false
 		end
