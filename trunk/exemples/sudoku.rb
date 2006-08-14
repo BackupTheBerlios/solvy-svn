@@ -104,8 +104,10 @@ end
 
 
 # puts pb.myH
+
+
 sol = pb.solveur
-sol.randomized = true
+sol.randomized = false
 if pb.solveAll()
 
 	while pb.next_sol

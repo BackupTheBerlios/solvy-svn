@@ -62,12 +62,9 @@ removed = []
 left = (0..80).to_a
 test = 0
 line = 0
-while sol.nb_found <= 1 && test < 80
+nb = sol.nb_found
+while nb <= 1 && test < 80
 
-	if sol.nb_found > 1
-    removed.pop
-		test +=1
-	end
 	a = rand(9)
 	idx = left[(line%9)*9+a]
 	#left.delete_at((line%9)*9+a)
@@ -79,6 +76,15 @@ while sol.nb_found <= 1 && test < 80
 	while sol.next_sol
 	end
 	line+=1
+ 
+  puts sol.nb_found
+  if sol.nb_found > 1
+    removed.pop
+		test +=1
+  end
+
+
+
 end
 
 removed.pop
