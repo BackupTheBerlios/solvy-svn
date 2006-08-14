@@ -17,6 +17,7 @@ require 'contraintes/scalar.rb'
 require 'contraintes/contrainteOpEq.rb'
 require 'contraintes/contrainteMul.rb'
 require 'contraintes/occurence.rb'
+require 'contraintes/contrainteGCC.rb'
 
 # Contraintes Boolean
 
@@ -210,6 +211,10 @@ class Problem < Tools
   # retourne une contrainte globale de difference entre toutes les variables dans tab
   def all_diff(tab, name)
     return ContrainteAD.new(tab, name)
+  end
+
+  def gcc(tab, mins, maxs)
+    return ContrainteGCC.new(tab, mins, maxs)
   end
   
   # sera remplacé par at_least et at_most, la flemme. meme pas implementé

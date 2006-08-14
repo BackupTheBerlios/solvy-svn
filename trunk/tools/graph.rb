@@ -155,17 +155,17 @@ class GraphMatching < Graph
 
     while !ap_found && !fifo.empty?
       x = fifo.shift
-	@graph[x].each do |y|
-	if !pred[y] && !ap_found
-	  @pred[y] = x
-	  if !@mate[y]
-	    ap_found = true
-	    transfert(y)
-	    break
-	  else
-	    fifo << @mate[y]
-	  end
-	end
+      @graph[x].each do |y|
+        if !pred[y] && !ap_found
+          @pred[y] = x
+          if !@mate[y]
+            ap_found = true
+            transfert(y)
+            break
+          else
+            fifo << @mate[y]
+          end
+        end
       end
     end
     ap_found
@@ -198,17 +198,17 @@ class GraphMatching < Graph
 
 
 
-#   Nom pédant qui permet de trouver tous les arcs "consistent"
-#   Le théorème serait de Petersen 1891
-#   Un arc appartient à un couplage max ssi :
-#   Soit M un couplage
-#   -il fait parti de M
-#   ou -il est dans un chemin alternant dans M commençant par un sommet qui ne fait pas partie de M
-#   ou -il est dans un circuit alternant dans M (ie. les arc du circuit sont 1 coup dans M, un coup non) -> CFC
+  #   Nom pédant qui permet de trouver tous les arcs "consistent"
+  #   Le théorème serait de Petersen 1891
+  #   Un arc appartient à un couplage max ssi :
+  #   Soit M un couplage
+  #   -il fait parti de M
+  #   ou -il est dans un chemin alternant dans M commençant par un sommet qui ne fait pas partie de M
+  #   ou -il est dans un circuit alternant dans M (ie. les arc du circuit sont 1 coup dans M, un coup non) -> CFC
 
-#   NB : normalement un couplage n'est pas orienté. Le fait de construire le graphe comme dans foo_graph permet une recherche simple des 2derniers
+  #   NB : normalement un couplage n'est pas orienté. Le fait de construire le graphe comme dans foo_graph permet une recherche simple des 2derniers
 
-#   Réf : Van Hoeve (pas d'année, 2004 je pense)
+  #   Réf : Van Hoeve (pas d'année, 2004 je pense)
 
 
   def hyper_arc_consistency
@@ -228,21 +228,21 @@ class GraphMatching < Graph
     # TODO : Mettre à jour cette fonction pour utiliser successors
     @mate.each_with_index do |x, i|
       if !x
-	reached = @mgraph.breadth_first_search i
-	reached.each do |k|
-	  @graph[k].each { |x| consistent_graph[k] << x if reached.include?(x) }
-	end
+        reached = @mgraph.breadth_first_search i
+        reached.each do |k|
+          @graph[k].each { |x| consistent_graph[k] << x if reached.include?(x) }
+        end
       end
     end
-    
+
     # On rajoute les arcs appartenant à la même composante fortement connexe
     scc = tarjan
     for i in 0..@i-1
       @graph[i].each do |y| 
-	if scc[i] == scc[y] 
-	  consistent_graph[i] << y
-	  consistent_graph[y] << i 
-	end
+        if scc[i] == scc[y] 
+          consistent_graph[i] << y
+          consistent_graph[y] << i 
+        end
       end
     end
 
