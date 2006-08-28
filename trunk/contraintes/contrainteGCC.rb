@@ -1,8 +1,10 @@
 require 'tools/flow.rb'
 require 'contraintes/contrainte.rb'
 
-# TODO : everything :p
+# TODO : filtering (method apply)
 # TODO : domain changes, backtrack
+# TODO : check if it is possible to raise an exception NotFeasible while looking for a max_path 
+# TODO : think about what happens if min is not 0
 
 # The Global Cardinality Constraint
 # Given a set of variables and values.
@@ -33,6 +35,8 @@ class ContrainteGCC < Contrainte
       source.add_arc(@val_nodes[val], mins[i], maxs[i])
       vars.each {|var| @val_nodes[val].add_arc @var_nodes[var] if var.domain.include? val}
     end
+    
+    @graph.maximise_flow
   end #initialize
 
   def statisfied?
@@ -43,12 +47,23 @@ class ContrainteGCC < Contrainte
   end
 
           
+  # TODO : same_scc to be optimized (use hashtable?)
+  def same_scc(start_node, end_node, scc)
+    scc[start_node] == scc[end_node]
+  end
 
   def apply(compteur, pile)
-    @graph.maximise_flow
-    puts @graph.to_s
-    puts @graph.tarjan
-    return @graph.is_feasible?
-  end
+    # Getting all SCC
+    # Deleting all arcs that have a null flow and donot belong to the same SCC
+    
+    scc = @graph.tarjan
+
+    @graph.each_arc do |arc|
+      if arc.flow == 0 && same_scc(arc.start_node, arc.end_node, scc)
+        puts "deleting arc : " + arc.to_s
+        arc.delete
+      end
+    end
+  end # apply
 
 end # classe ContrainteGCC

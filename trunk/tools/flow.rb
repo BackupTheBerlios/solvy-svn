@@ -1,5 +1,8 @@
 require 'set'
 
+# TODO : test/debug
+# TODO : clean-up code, make it more rubyish (specialy tarjan method
+
 def min(a,b)
   return a if a<b
   return b
@@ -19,6 +22,9 @@ class Node
 
   def add_arc_out arc; @arcs_out << arc; end
   def add_arc_in arc; @arcs_in << arc; end
+
+  def delete_arc_out arc; @arcs_out.delete arc; end
+  def delete_arc_in arc; arcs_in.delete arc; end
 
   def add_arc(node, min_flow=0, max_flow=1, flow=0)
     arc = Arc.new(self, node, min_flow, max_flow, flow)
@@ -67,6 +73,11 @@ class Arc
   def residue; return @max_flow - @flow; end
 
   def reverse_residue; return @flow - @min_flow; end
+
+  def delete
+    @start_node.delete self
+    @end_node.delete self
+  end
   
 end # class Arc
 
@@ -81,6 +92,12 @@ class Flow_graph
 
   def nb_nodes; return @nodes_list.size; end
   def each; @nodes_list.each{|node| yield node}; end
+  
+  def each_arc
+    @nodes_list.each do|node|
+      node.each_arc_out{ |arc| yield arc}
+    end
+  end
 
   def add_node value=0
     node = Node.new(value)
@@ -132,6 +149,7 @@ class Flow_graph
   end
 
 
+  # TODO get this shit more cleaner
   # Retourne les composantes fortement connexes
   # Tous les noeuds d'une même composante on le même no dans le tableau
   def tarjan
