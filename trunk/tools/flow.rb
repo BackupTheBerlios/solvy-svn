@@ -45,9 +45,12 @@ class Node
   
   def to_s; "node: {title: \"#@value\"}"; end
 
-  def is_marked?; return @marker; end
+  def is_marked?; @marker; end
 
   def mark; @marker = true; end
+
+  def flow_in; @arcs_in.inject{|sum, arc| sum + arc.flow}; end
+  def flow_out; @arcs_out.inject{|sum, arc| sum + arc.flow}; end
     
 end #class Node
 
@@ -75,8 +78,8 @@ class Arc
   def reverse_residue; return @flow - @min_flow; end
 
   def delete
-    @start_node.delete self
-    @end_node.delete self
+    @start_node.delete_arc_out self
+    @end_node.delete_arc_in self
   end
   
 end # class Arc
@@ -123,6 +126,8 @@ class Flow_graph
     s.mark
 
     # if we're the sinc
+    # TODO : we should find something better to determine which is the sink and source
+    # I think that the algorthimes could be implemented without knowing which node is the sink or source
     return [[],[], 1.0/0] if s == @nodes_list[1]
 
     #We'll explore each arc, to see if there is an augmenting path throught it
@@ -150,8 +155,8 @@ class Flow_graph
 
 
   # TODO get this shit more cleaner
-  # Retourne les composantes fortement connexes
-  # Tous les noeuds d'une même composante on le même no dans le tableau
+  # Returns all the strongly connected components as a hash
+  # Two nodes of the same SCC will be two keys for the same value
   def tarjan
     root = {} 
     rang = {}
@@ -171,11 +176,10 @@ class Flow_graph
 
       if rang[s] == root[s]
         k += 1
-        scc[k] = [] unless scc[k]
         until (z = pile.pop) == s
-          scc[k] << z
+          scc[z] = k
         end
-        scc[k] << s
+        scc[s] = k
       end
     end
 
@@ -202,17 +206,16 @@ class Flow_graph
     str
   end
 
-  def is_feasible?
+  def feasible?
     @nodes_list.each do |node|
       if node != @nodes_list[0] && node != @nodes_list[1]
-        in_sum = 0
-        out_sum = 0
-        node.each_arc_in{|arc| in_sum += arc.flow}
-        node.each_arc_out{|arc| out_sum += arc.flow}
-        return false if in_sum != out_sum
+        puts node
+        return false if node.flow_in != node.flow_out
       end
     end
-    return true
+    flows = true
+    each_arc{|arc| flows &= (arc.flow >= arc.min_flow && arc.flow <= arc.max_flow) }
+    return flows
   end
 
 end

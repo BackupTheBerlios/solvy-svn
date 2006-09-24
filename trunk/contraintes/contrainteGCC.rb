@@ -1,24 +1,32 @@
 require 'tools/flow.rb'
 require 'contraintes/contrainte.rb'
-
-# TODO : filtering (method apply)
-# TODO : domain changes, backtrack
-# TODO : check if it is possible to raise an exception NotFeasible while looking for a max_path 
-# TODO : think about what happens if min is not 0
-
 # The Global Cardinality Constraint
 # Given a set of variables and values.
 # Each value, has to appear at least min times, and at most max times
+
+
+# NOTE : This contraint should be polymorphic :p (whoa! such an amzing word!!)
+# NOTE : In theorie the graph current graph should represent a maximum flow
+# ----> the calculation is done during initialization and updated during apply
+
+# TODO : filtering (method apply)
+# TODO : domain changes, backtrack : o<
+# TODO : check if it is possible to raise an exception NotFeasible while looking for a max_path 
+# TODO : think about what happens if min is not 0 (if I remember ford fulkerson has to start with some feasible flow)
+
 class ContrainteGCC < Contrainte
 
   attr_reader :vars
   
+  # mins and maxs are hash tables for each value
+  # raises ArgumentError if a certain a value has no associated min or max
+  # TODO : thinking about a default behaviour (ie. 0 and +inf)
   def initialize(vars, mins, maxs)
     @tab = vars
     @graph = Flow_graph.new
     source = @graph.add_node "Source"
     sink = @graph.add_node "Sink"
-    sink.add_arc(source, 0, 1.0/0)
+    sink.add_arc(source, 0, 1.0/0) # is it needed?
 
     @var_nodes = {}
     vals = []
@@ -30,24 +38,25 @@ class ContrainteGCC < Contrainte
 
     
     @val_nodes ={}
-    vals.each_with_index do |val, i|
+    vals.each do |val|
       @val_nodes[val] = @graph.add_node val
-      source.add_arc(@val_nodes[val], mins[i], maxs[i])
+      source.add_arc(@val_nodes[val], mins[val], maxs[val])
       vars.each {|var| @val_nodes[val].add_arc @var_nodes[var] if var.domain.include? val}
     end
     
     @graph.maximise_flow
   end #initialize
 
-  def statisfied?
-    return @graph.is_feasible?
+  def satisfied?
+      # first we check that each variable has at least one value assigned
+      @var_nodes.each_value{|node| puts node.flow_out}
+      return @graph.feasible?
   end
 
   def update(deleted, added, var, compteur, pile)
   end
 
-          
-  # TODO : same_scc to be optimized (use hashtable?)
+
   def same_scc(start_node, end_node, scc)
     scc[start_node] == scc[end_node]
   end
@@ -55,15 +64,20 @@ class ContrainteGCC < Contrainte
   def apply(compteur, pile)
     # Getting all SCC
     # Deleting all arcs that have a null flow and donot belong to the same SCC
-    
-    scc = @graph.tarjan
 
+    scc = @graph.tarjan
+    #puts @graph
+    #scc.each_pair{|node, blah| puts node.to_s + " = " + blah.to_s }
+
+    puts satisfied?
+    puts @graph.feasible?
     @graph.each_arc do |arc|
-      if arc.flow == 0 && same_scc(arc.start_node, arc.end_node, scc)
+      if arc.flow == 0 && !same_scc(arc.start_node, arc.end_node, scc)
         puts "deleting arc : " + arc.to_s
         arc.delete
       end
     end
+    true
   end # apply
 
 end # classe ContrainteGCC
