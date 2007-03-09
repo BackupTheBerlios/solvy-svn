@@ -1,9 +1,10 @@
-
+require 'environment.rb'
 class Backtrackable 
 
   #variables d'instance
   
-  @current_value # Object copy at current node
+  @obj_ptr       # object pointer
+  @current_value # Backtrackable part of the object
   @trail         # Objects trail
   @stamp         # world stamp
   @environment   # class containing the trails
@@ -13,7 +14,14 @@ class Backtrackable
   attr_reader :environment,:trail
 
   def initialize (env,obj)
-    @current_value = obj
+    begin 
+      @current_value = obj.backtrackable()
+      @obj_ptr = obj
+    rescue
+      @current_value = obj
+      @obj_ptr  = obj
+    end
+
     @environment = env
     @stamp = env.current_world()
     @trail = env.trail();
@@ -26,7 +34,7 @@ class Backtrackable
 
   
   def to_s
-    puts current_value()
+    @current_value.to_s
   end
 end
 

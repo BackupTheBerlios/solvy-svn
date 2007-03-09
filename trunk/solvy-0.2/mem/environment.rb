@@ -1,3 +1,4 @@
+require 'trail.rb'
 
 class Environment
 
@@ -10,6 +11,7 @@ class Environment
 
   def initialize
     @trail = Trail.new(self)
+    @current_world = 0
   end
 
   def get_world_index
@@ -17,13 +19,13 @@ class Environment
   end
 
   def world_push
-    trail.world_push()
+    @trail.world_push()
     @current_world += 1
   end
 
   def world_pop
-    trail.world_pop()
-    current_world -= 1
+    @trail.world_pop()
+    @current_world -= 1
   end
 
 
