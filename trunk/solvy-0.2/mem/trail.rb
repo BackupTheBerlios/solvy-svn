@@ -6,52 +6,44 @@ class Trail
   @variable_stack
   @value_stack
   @stamp_stack
-  @current_level
-  @world_start_levels
+  @level
+  @starts
 
   attr_reader :environment
-  attr_accessor :variable_stack,:value_stack,:stamp_stack,:current_level
+  attr_accessor :variable_stack,:value_stack,:stamp_stack,:level,:starts
 
   def initialize(env)
     @environment = env
-    @current_level = 0
+    @level = 0
     @variable_stack = []
     @value_stack = []
     @stamp_stack = []
-    @world_start_levels = []
-    @world_start_levels[@current_level] = 0
+    @starts = []
   end
 
 
   def world_push
-    @world_start_levels[@environment.current_world() +1] = @current_level
+    @starts[@environment.world()+1] = @level
   end
 
   def world_pop
-    while (@current_level > @world_start_levels[@environment.current_world()])
-      @current_level-=1
-      v = @variable_stack[@current_level]
-      v.current_value = @value_stack[@current_level]
-      v.stamp = @stamp_stack[@current_level]
+    while (@level > @starts[@environment.world()])
+      @level-=1
+      v = @variable_stack[@level]
+      v.backtrackable = @value_stack[@level]
+      v.world = @stamp_stack[@level]
     end
   end
 
   def get_size
-    @current_level
-  end
-
-  def save_previous_state(v,old_val,old_stamp)
-    @value_stack[@current_level] = old_val
-    @variable_stack[@current_level] = v
-    @stamp_stack[@current_level] = old_stamp
-    @current_level+=1
+    @level
   end
 
   def save(v)
-    @value_stack[@current_level] = v.get()
-    @variable_stack[@current_level] = v
-    @stamp_stack[@current_level] = v.stamp()
-    @current_level+=1
+    @value_stack[@level] = v.backtrackable()
+    @variable_stack[@level] = v
+    @stamp_stack[@level] = v.world()
+    @level+=1
 
 
   end
